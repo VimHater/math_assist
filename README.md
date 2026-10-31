@@ -89,5 +89,5 @@ PYTHONPATH=src .python_venv/bin/python -m harness.cli --lean \
 5. The result is classified as `accepted`, `has_sorry`, or `failed`. Errors and
    goals are appended to the conversation and the loop retries.
 
-On success the harness captures the elaborated proof term via `show_term` and
-feeds it back so the model can explain what Lean actually did.
+On success the harness reports the tactic used and a natural-language
+explanation of the mathematical argument.

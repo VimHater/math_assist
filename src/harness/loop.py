@@ -35,16 +35,6 @@ EXPLAIN_PROMPT = (
     "Do not mention Lean tactics or syntax. Present the mathematics, not the code."
 )
 
-EXPLAIN_LEAN_PROMPT = (
-    "You are an expert on Lean 4 internals and Mathlib tactics. "
-    "The user shows a Lean 4 theorem, the tactic script that proves it, and the "
-    "exact elaborated proof term Lean produced (captured via `show_term`). "
-    "Explain, from the term itself, what Lean did mechanically: which lemmas and "
-    "constructions the term references, and what normalization or rewriting "
-    "happened to close the goal. Name the constants visible in the term. "
-    "Plain prose, no code blocks."
-)
-
 STATEMENT_PROMPT = (
     "Translate the user's natural-language mathematical statement into Lean 4 code, "
     "using Mathlib. Output one or more `import` lines, then a single theorem "
@@ -64,8 +54,6 @@ class SolveResult:
     iterations: int
     source: str = ""
     explanation: str = ""
-    lean_explanation: str = ""
-    term: str = ""
 
 
 def extract_code(response: str) -> str:
@@ -81,13 +69,6 @@ def extract_code(response: str) -> str:
             lines = lines[:-1]
         text = "\n".join(lines).strip()
     return text
-
-
-def _clip(text: str, limit: int) -> str:
-    """Truncate long text to keep the model context bounded."""
-    if len(text) <= limit:
-        return text
-    return text[:limit] + "\n… (truncated)"
 
 
 class Loop:
@@ -241,21 +222,6 @@ class Loop:
                         f"Proof:\n```lean\n{proof}\n```"
                     ),
                 },
-            ]
-        )
-
-    def explain_lean(self, statement: str, proof: str, term: str = "") -> str:
-        """Ask the model to explain the compiled proof term Lean produced."""
-        parts = [
-            f"Statement:\n```lean\n{statement}\n```",
-            f"Proof:\n```lean\n{proof}\n```",
-        ]
-        if term:
-            parts.append(f"Elaborated proof term (`show_term`):\n{_clip(term, 4000)}")
-        return self.llm.complete(
-            [
-                {"role": "system", "content": EXPLAIN_LEAN_PROMPT},
-                {"role": "user", "content": "\n\n".join(parts)},
             ]
         )
 

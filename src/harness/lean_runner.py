@@ -128,20 +128,6 @@ class LeanRunner:
             raw=proc.stdout + proc.stderr,
         )
 
-    def capture_proof_term(self, statement: str, proof: str) -> str:
-        """Return the elaborated proof term Lean prints via `show_term`."""
-        body = "\n".join(
-            (f"  {line}" if line.strip() else line) for line in proof.splitlines()
-        )
-        source = f"{statement.rstrip()}\n  show_term\n{body}\n"
-        result = self.check(source)
-        for diag in result.diagnostics:
-            if diag.severity in ("information", "info") and diag.data.lstrip().startswith(
-                "Try this:"
-            ):
-                return diag.data
-        return ""
-
 
 def make_prelude(imports: str, theorem: str) -> str:
     """Combine import lines and a `theorem ... := by` line into a checkable prelude."""

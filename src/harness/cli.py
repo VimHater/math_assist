@@ -99,19 +99,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if result.status == ACCEPTED:
         try:
-            result.term = runner.capture_proof_term(prelude, result.proof)
-        except Exception:
-            result.term = ""
-        try:
             result.explanation = loop.explain(prelude, result.proof)
         except Exception as exc:
             result.explanation = f"(explanation unavailable: {exc})"
-        try:
-            result.lean_explanation = loop.explain_lean(
-                prelude, result.proof, result.term
-            )
-        except Exception as exc:
-            result.lean_explanation = f"(explanation unavailable: {exc})"
 
     print(f"status: {result.status} (iterations used: {result.iterations})")
     print("proof (method):")
@@ -125,13 +115,6 @@ def main(argv: list[str] | None = None) -> int:
         print()
         print("mathematical proof:")
         print(result.explanation)
-        print()
-        if result.term:
-            print("compiled proof term (from Lean `show_term`, truncated):")
-            print(result.term[:1200] + ("..." if len(result.term) > 1200 else ""))
-            print()
-        print("what Lean did:")
-        print(result.lean_explanation)
     else:
         print("not accepted. last diagnostics:")
         for diag in result.check.diagnostics:
